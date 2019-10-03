@@ -27,6 +27,8 @@ public class One_BuildingCount {
       // Kan her sette hva vi skal dele på:
       StringTokenizer itr = new StringTokenizer(value.toString());
 
+      
+      //hei
       // Går nå igjennom alle ordene:
       while (itr.hasMoreTokens()) {
 
