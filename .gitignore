@@ -26,10 +26,7 @@ hs_err_pid*
 .idea
 Bigdatatest.iml
 input
-mobydick.txt
-output
 pom.xml
-src
 target
 
 #DS-Store files
