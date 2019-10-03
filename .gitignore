@@ -21,3 +21,17 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+#Intellij
+.idea
+Bigdatatest.iml
+input
+mobydick.txt
+output
+pom.xml
+src
+target
+
+#DS-Store files
+.DS_Store
+**/.DS_Store
