@@ -23,7 +23,7 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
 
-// Which 20 highways contains the most nodes? - De innenfor Tags eller Way??
+// Hvor mange <nd> elementer det er i <way> xml noder som har en tag med highway=*
 
 public class Four_20TopHighWayNodes {
 
@@ -190,29 +190,57 @@ public class Four_20TopHighWayNodes {
 
                 Element root = document.getDocumentElement();
 
-                // Henter ut key i alle tag-er
-                NodeList tagList = root.getElementsByTagName("tag");
+                // Henter way noder
+                NodeList wayList = root.getElementsByTagName("way");
 
                 HashMap highWayListe = new HashMap();
-                int counter = 0;
+
+                // For å ta vare på id-en til highway-noder som skal printes ut
+                String highwayId = "";
 
                 // Tell opp alle ganger highway forekommer
-                for(int i = 0; i < tagList.getLength(); i++) {
+                for(int i = 0; i < wayList.getLength(); i++) {
 
-                    //Henter ut verdi til highway
-                    String tagAttributeValue = tagList.item(i).getAttributes().getNamedItem("v").getTextContent();
+                    // Nåværende way
+                    Node aWay = wayList.item(i);
+                    // Teller for nd-noder
+                    int counter = 0;
 
-                    //Teller en på denne i HashMap!!
+                    // Om denne way-noden har child-nodes henter jeg ut disse.
+                    if(aWay.hasChildNodes()){
 
+                        // Henter ut alle child-nodes til way-noden
+                        NodeList childNodeList = aWay.getChildNodes();
 
+                        // Går igjennom alle disse child-nodene
+                        for(int j = 0; j < childNodeList.getLength(); j++) {
 
+                            // Nåværende child-node i way
+                            Node childNode = childNodeList.item(j);
+
+                            // Teller antall nd-noder for denne way-noden
+                            if(childNode.getNodeName().equals("nd")){
+                                counter++;
+                            }
+
+                            // Om way-en inneholder en tag som er highway- skal vi ta vare på denne noden
+                            if(childNode.getNodeName().equals("tag")){
+                                if(childNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")){
+
+                                    // Nåværende way er en highway-way. Tar vare på dens ID
+                                    highwayId = aWay.getAttributes().getNamedItem("id").getTextContent();
+                                }
+                            }
+                        }
+
+                        context.write(new Text(highwayId), new IntWritable(counter));
+                    }
+
+                    // For hashMap!
                     //  <tag k="highway" v="residential"/>
-                    highWayListe.put(tagAttributeValue, ++counter);
-
-
+                    // highWayListe.put(tagAttributeValue, ++counter);
                     // key = k, value = v00
 
-                    // context.write(new Text("The object that has been updated the most times is node with the id " + newestNodeId + " has version: "), new IntWritable(newestVersion));
 
 
                 }
