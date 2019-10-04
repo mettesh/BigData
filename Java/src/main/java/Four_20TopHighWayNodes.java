@@ -181,7 +181,7 @@ public class Four_20TopHighWayNodes {
                 String highwayId = "";
 
                 // Tell opp alle ganger highway forekommer
-                for(int i = 0; i < wayList.getLength(); i++) {
+                for (int i = 0; i < wayList.getLength(); i++) {
 
                     // Nåværende way
                     Node aWay = wayList.item(i);
@@ -189,32 +189,33 @@ public class Four_20TopHighWayNodes {
                     int counter = 0;
 
                     // Om denne way-noden har child-nodes henter jeg ut disse.
-                    if(aWay.hasChildNodes()){
+                    if (aWay.hasChildNodes()) {
 
                         // Henter ut alle child-nodes til way-noden
                         NodeList childNodeList = aWay.getChildNodes();
 
                         // Går igjennom alle disse child-nodene
-                        for(int j = 0; j < childNodeList.getLength(); j++) {
+                        for (int j = 0; j < childNodeList.getLength(); j++) {
 
                             // Nåværende child-node i way
                             Node childNode = childNodeList.item(j);
 
                             // Teller antall nd-noder for denne way-noden
-                            if(childNode.getNodeName().equals("nd")){
+                            if (childNode.getNodeName().equals("nd")) {
                                 counter++;
                             }
 
                             // Om way-en inneholder en tag som er highway- skal vi ta vare på denne noden
-                            if(childNode.getNodeName().equals("tag")){
-                                if(childNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")){
+                            if (childNode.getNodeName().equals("tag")) {
+                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")) {
 
                                     // Nåværende way er en highway-way. Tar vare på dens ID
                                     highwayId = aWay.getAttributes().getNamedItem("id").getTextContent();
                                 }
                             }
+
+                            context.write(new Text(highwayId), new IntWritable(counter));
                         }
-                        context.write(new Text(highwayId), new IntWritable(counter));
                     }
                 }
 
