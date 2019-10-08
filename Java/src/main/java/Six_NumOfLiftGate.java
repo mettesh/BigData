@@ -1,25 +1,25 @@
-// What is the average number of nodes used to form the building ways in the extract?
-
 import java.io.IOException;
-        import java.io.StringReader;
-        import java.util.*;
-        import org.apache.hadoop.conf.Configuration;
-        import org.apache.hadoop.fs.Path;
-        import org.apache.hadoop.fs.FSDataInputStream;
-        import org.apache.hadoop.fs.FileSystem;
-        import org.apache.hadoop.io.*;
-        import org.apache.hadoop.io.Text;
-        import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-        import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-        import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-        import org.apache.hadoop.mapreduce.*;
-        import javax.xml.parsers.*;
-        import javax.xml.parsers.ParserConfigurationException;
-        import org.w3c.dom.*;
-        import org.xml.sax.SAXException;
-        import org.xml.sax.InputSource;
+import java.io.StringReader;
+import java.util.*;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.*;
+import javax.xml.parsers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 
-public class Five_AverageNumOfNodesBuilding {
+// How many ways of types ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified” contains a node with the tag ”barrier=lift gate”?
+
+public class Six_NumOfLiftGate {
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
@@ -30,7 +30,7 @@ public class Five_AverageNumOfNodesBuilding {
 
         Job job = Job.getInstance(conf, "xml count");
 
-        job.setJarByClass(Five_AverageNumOfNodesBuilding.class);
+        job.setJarByClass(Six_NumOfLiftGate.class);
         job.setMapperClass(TokenizerMapper.class);
         job.setReducerClass(IntSumReducer.class);
         job.setInputFormatClass(StartEndFileInputFormat.class);
@@ -158,6 +158,7 @@ public class Five_AverageNumOfNodesBuilding {
     public static class TokenizerMapper extends Mapper< Object, Text, Text, IntWritable > {
 
         private final static IntWritable one = new IntWritable(1);
+        private final static IntWritable none = new IntWritable(0);
 
         public void map(Object key, Text value, Context context) throws IOException,
                 InterruptedException {
@@ -171,17 +172,21 @@ public class Five_AverageNumOfNodesBuilding {
                 document.getDocumentElement().normalize();
                 Element root = document.getDocumentElement();
 
+
+                // How many ways of types ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified” contains a node with the tag ”barrier=lift gate”?
+
+
                 // Henter way noder
                 NodeList wayList = root.getElementsByTagName("way");
-                
-                // Counter for alle noder totalt
-                int totalNodesCounter = 0;
 
-                // Counter for alle way-er gått igjennom
-                int numOfBuldingWays = 0;
+                boolean containsBarrier;
+                int wayCounter;
 
-                // Tell opp alle ganger highway forekommer
+                // Går igjennom alle way-taggene
                 for (int i = 0; i < wayList.getLength(); i++) {
+
+                    wayCounter = 0;
+                    containsBarrier = false;
 
                     // Nåværende way
                     Node aWay = wayList.item(i);
@@ -192,45 +197,73 @@ public class Five_AverageNumOfNodesBuilding {
                         // Henter ut alle child-nodes til way-noden
                         NodeList childNodeList = aWay.getChildNodes();
 
-                        // En teller for noder i nåværende way:
-                        int counter = 0;
-
-                        Boolean isABuilding = false;
-
-                        // Går igjennom alle disse child-nodene for å telle antall noder:
+                        // Går igjennom alle disse child-nodene
                         for (int j = 0; j < childNodeList.getLength(); j++) {
+
                             // Nåværende child-node i way
                             Node childNode = childNodeList.item(j);
-                            // Teller antall nd-noder totalt
-                            if (childNode.getNodeName().equals("nd")) {
-                                counter++;
-                            }
 
-                            // Om ta-en man kommer over er en building, vet jeg at det er en building-way
+                            //Om noden man kommer til er en Tag sjekker man denne
                             if (childNode.getNodeName().equals("tag")) {
-                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("building")) {
-                                    isABuilding = true;
 
-                                    // Legger på en på telleren for antall building-wayer gått igjennom:
-                                    numOfBuldingWays++;
+                                //System.out.println("Noden man kommer til er en tag");
+
+                                // Sjekker om way-en inneholder en node med ”barrier=lift gate”
+                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("barrier")) {
+
+                                    //System.out.println("Noden inneholder attributten barrier");
+
+                                    if (childNode.getAttributes().getNamedItem("v").getTextContent().equals("lift_gate")) {
+
+                                        //System.out.println("Noden inneholder attributt barrier med verdi lift_gate");
+
+                                        containsBarrier = true;
+                                    }
+                                }
+
+                                // Sjekker om det er en highway av ønsket type
+                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")) {
+
+                                    // Om way-en er av riktig hghwaytype skal denne sjekkes
+
+                                    if (isCorrectHighwayType(childNode)) {
+
+                                        // Om denne wayen har vist seg å inneholde barrier skal det plusses på en
+                                        if(containsBarrier) {
+
+                                            // wayCounter++;
+
+                                            context.write(new Text("Numbers of ways of type highway= " + childNode.getAttributes().removeNamedItem("v").getTextContent() + "  that a node with the tag ”bar-rier=liftgate”: " ), one);
+                                        }
+                                        else {
+                                            context.write(new Text("Numbers of ways of type highway= " + childNode.getAttributes().removeNamedItem("v").getTextContent() + "  that a node with the tag ”bar-rier=liftgate”: " ), none);
+                                        }
+                                    }
+
                                 }
                             }
                         }
-
-                        if(isABuilding){
-                            // Ettersom det nå var funnet en building blandt disse barnanodene, skal vi ta vare på nodene telt over:
-                            totalNodesCounter += counter;
-                        }
                     }
+
+                    // context.write(new Text("Antall way-er med riktig highway-type som inneholder taggen ”barrier=lift gate”"), new IntWritable(wayCounter));
+
                 }
-                int averageNodes = totalNodesCounter/numOfBuldingWays;
-                context.write(new Text("The average number of nodes used to form the building ways is: "), new IntWritable(averageNodes));
+
 
             } catch (SAXException exception) {
-                // ignore
+                System.out.println("SAXException: " + exception);
             } catch (ParserConfigurationException exception) {
-
+                System.out.println("ParserConfigurationException: " + exception);
             }
+        }
+
+        private boolean isCorrectHighwayType(Node childNode) {
+            //Sjekker om highway er en av disse typene: ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified”
+
+            return childNode.getAttributes().getNamedItem("v").getTextContent().equals("path")
+                    || childNode.getAttributes().getNamedItem("v").getTextContent().equals("service")
+                    || childNode.getAttributes().getNamedItem("v").getTextContent().equals("road")
+                    || childNode.getAttributes().getNamedItem("v").getTextContent().equals("unclassified");
         }
 
     }
