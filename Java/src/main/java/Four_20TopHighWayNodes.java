@@ -26,8 +26,8 @@ public class Four_20TopHighWayNodes {
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
 
-        conf.set("startTag", "<osm");
-        conf.set("endTag", "</osm>");
+        conf.set("startTag", "<way");
+        conf.set("endTag", "</way>");
 
         Job job = Job.getInstance(conf, "xml count");
 
@@ -170,22 +170,12 @@ public class Four_20TopHighWayNodes {
                 InputSource is = new InputSource(new StringReader(value.toString()));
                 Document document = builder.parse(is);
                 document.getDocumentElement().normalize();
-                Element root = document.getDocumentElement();
 
-                // Henter way noder
-                NodeList wayList = root.getElementsByTagName("way");
-
-                HashMap highWayListe = new HashMap();
+                Element aWay = document.getDocumentElement();
 
                 // For å ta vare på id-en til highway-noder som skal printes ut
                 String highwayId = "";
 
-                // Tell opp alle ganger highway forekommer
-                for (int i = 0; i < wayList.getLength(); i++) {
-
-                    // Nåværende way
-                    Node aWay = wayList.item(i);
-                    // Teller for nd-noder
                     int counter = 0;
 
                     // Om denne way-noden har child-nodes henter jeg ut disse.
@@ -216,7 +206,7 @@ public class Four_20TopHighWayNodes {
 
                             context.write(new Text(highwayId), new IntWritable(counter));
                         }
-                    }
+                    //}
                 }
 
             } catch (SAXException exception) {
