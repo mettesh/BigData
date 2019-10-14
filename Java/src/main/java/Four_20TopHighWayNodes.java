@@ -176,37 +176,36 @@ public class Four_20TopHighWayNodes {
                 // For å ta vare på id-en til highway-noder som skal printes ut
                 String highwayId = "";
 
-                    int counter = 0;
+                int counter = 0;
 
-                    // Om denne way-noden har child-nodes henter jeg ut disse.
-                    if (aWay.hasChildNodes()) {
+                // Om denne way-noden har child-nodes henter jeg ut disse.
+                if (aWay.hasChildNodes()) {
 
-                        // Henter ut alle child-nodes til way-noden
-                        NodeList childNodeList = aWay.getChildNodes();
+                    // Henter ut alle child-nodes til way-noden
+                    NodeList childNodeList = aWay.getChildNodes();
 
-                        // Går igjennom alle disse child-nodene
-                        for (int j = 0; j < childNodeList.getLength(); j++) {
+                    // Går igjennom alle disse child-nodene
+                    for (int j = 0; j < childNodeList.getLength(); j++) {
 
-                            // Nåværende child-node i way
-                            Node childNode = childNodeList.item(j);
+                        // Nåværende child-node i way
+                        Node childNode = childNodeList.item(j);
 
-                            // Teller antall nd-noder for denne way-noden
-                            if (childNode.getNodeName().equals("nd")) {
-                                counter++;
-                            }
-
-                            // Om way-en inneholder en tag som er highway- skal vi ta vare på denne noden
-                            if (childNode.getNodeName().equals("tag")) {
-                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")) {
-
-                                    // Nåværende way er en highway-way. Tar vare på dens ID
-                                    highwayId = aWay.getAttributes().getNamedItem("id").getTextContent();
-                                }
-                            }
-
-                            context.write(new Text(highwayId), new IntWritable(counter));
+                        // Teller antall nd-noder for denne way-noden
+                        if (childNode.getNodeName().equals("nd")) {
+                            counter++;
                         }
-                    //}
+
+                        // Om way-en inneholder en tag som er highway- skal vi ta vare på denne noden
+                        if (childNode.getNodeName().equals("tag")) {
+                            if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")) {
+
+                                // Nåværende way er en highway-way. Tar vare på dens ID
+                                highwayId = aWay.getAttributes().getNamedItem("id").getTextContent();
+                            }
+                        }
+
+                        context.write(new Text(highwayId), new IntWritable(counter));
+                    }
                 }
 
             } catch (SAXException exception) {
