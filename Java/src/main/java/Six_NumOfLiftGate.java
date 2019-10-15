@@ -25,8 +25,8 @@ public class Six_NumOfLiftGate {
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
 
-        conf.set("startTag", "<osm");
-        conf.set("endTag", "</osm>");
+        conf.set("startTag", "<way");
+        conf.set("endTag", "</way>");
 
         Job job = Job.getInstance(conf, "xml count");
 
@@ -170,85 +170,51 @@ public class Six_NumOfLiftGate {
                 InputSource is = new InputSource(new StringReader(value.toString()));
                 Document document = builder.parse(is);
                 document.getDocumentElement().normalize();
-                Element root = document.getDocumentElement();
 
 
-                // How many ways of types ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified” contains a node with the tag ”barrier=lift gate”?
+                Element aWay = document.getDocumentElement();
 
-
-                // Henter way noder
-                NodeList wayList = root.getElementsByTagName("way");
+                // Henter tag noder
+                NodeList tagList = aWay.getElementsByTagName("tag");
 
                 boolean containsBarrier;
                 int wayCounter;
 
-                // Går igjennom alle way-taggene
-                for (int i = 0; i < wayList.getLength(); i++) {
+                wayCounter = 0;
+                containsBarrier = false;
 
-                    wayCounter = 0;
-                    containsBarrier = false;
 
-                    // Nåværende way
-                    Node aWay = wayList.item(i);
+                // Går igjennom alle disse child-nodene
+                for (int j = 0; j < tagList.getLength(); j++) {
 
-                    // Om denne way-noden har child-nodes henter jeg ut disse.
-                    if (aWay.hasChildNodes()) {
+                    Node tagNode = tagList.item(j);
 
-                        // Henter ut alle child-nodes til way-noden
-                        NodeList childNodeList = aWay.getChildNodes();
+                    // Sjekker om way-en inneholder en node med ”barrier=lift gate”
+                    if (tagNode.getAttributes().getNamedItem("k").getTextContent().equals("barrier")) {
+                        if (tagNode.getAttributes().getNamedItem("v").getTextContent().equals("lift_gate")) {
 
-                        // Går igjennom alle disse child-nodene
-                        for (int j = 0; j < childNodeList.getLength(); j++) {
-
-                            // Nåværende child-node i way
-                            Node childNode = childNodeList.item(j);
-
-                            //Om noden man kommer til er en Tag sjekker man denne
-                            if (childNode.getNodeName().equals("tag")) {
-
-                                //System.out.println("Noden man kommer til er en tag");
-
-                                // Sjekker om way-en inneholder en node med ”barrier=lift gate”
-                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("barrier")) {
-
-                                    //System.out.println("Noden inneholder attributten barrier");
-
-                                    if (childNode.getAttributes().getNamedItem("v").getTextContent().equals("lift_gate")) {
-
-                                        //System.out.println("Noden inneholder attributt barrier med verdi lift_gate");
-
-                                        containsBarrier = true;
-                                    }
-                                }
-
-                                // Sjekker om det er en highway av ønsket type
-                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")) {
-
-                                    // Om way-en er av riktig hghwaytype skal denne sjekkes
-
-                                    if (isCorrectHighwayType(childNode)) {
-
-                                        // Om denne wayen har vist seg å inneholde barrier skal det plusses på en
-                                        if(containsBarrier) {
-
-                                            // wayCounter++;
-
-                                            context.write(new Text("Numbers of ways of type highway= " + childNode.getAttributes().removeNamedItem("v").getTextContent() + "  that a node with the tag ”bar-rier=liftgate”: " ), one);
-                                        }
-                                        else {
-                                            context.write(new Text("Numbers of ways of type highway= " + childNode.getAttributes().removeNamedItem("v").getTextContent() + "  that a node with the tag ”bar-rier=liftgate”: " ), none);
-                                        }
-                                    }
-
-                                }
-                            }
+                            containsBarrier = true;
                         }
                     }
 
-                    // context.write(new Text("Antall way-er med riktig highway-type som inneholder taggen ”barrier=lift gate”"), new IntWritable(wayCounter));
+                    // Sjekker om det er en highway av ønsket type
+                    if (tagNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")) {
 
+                        // Om way-en er av riktig hghwaytype skal denne sjekkes
+
+                        if (isCorrectHighwayType(tagNode)) {
+
+                            // Om denne wayen har vist seg å inneholde barrier skal det plusses på en
+                            if(containsBarrier) {
+                                context.write(new Text("Numbers of ways of type highway= " + tagNode.getAttributes().removeNamedItem("v").getTextContent() + "  that a node with the tag ”bar-rier=liftgate”: " ), one);
+                            }
+                            else {
+                                context.write(new Text("Numbers of ways of type highway= " + tagNode.getAttributes().removeNamedItem("v").getTextContent() + "  that a node with the tag ”bar-rier=liftgate”: " ), none);
+                            }
+                        }
+
+                    }
                 }
-
 
             } catch (SAXException exception) {
                 System.out.println("SAXException: " + exception);
