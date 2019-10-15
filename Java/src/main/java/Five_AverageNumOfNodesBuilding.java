@@ -25,8 +25,8 @@ public class Five_AverageNumOfNodesBuilding {
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
 
-        conf.set("startTag", "<osm");
-        conf.set("endTag", "</osm>");
+        conf.set("startTag", "<way");
+        conf.set("endTag", "</way>");
 
         Job job = Job.getInstance(conf, "xml count");
 
@@ -157,8 +157,6 @@ public class Five_AverageNumOfNodesBuilding {
 
     public static class TokenizerMapper extends Mapper< Object, Text, Text, IntWritable > {
 
-        private final static IntWritable one = new IntWritable(1);
-
         public void map(Object key, Text value, Context context) throws IOException,
                 InterruptedException {
 
@@ -169,67 +167,25 @@ public class Five_AverageNumOfNodesBuilding {
                 InputSource is = new InputSource(new StringReader(value.toString()));
                 Document document = builder.parse(is);
                 document.getDocumentElement().normalize();
-                Element root = document.getDocumentElement();
 
-                // Henter way noder
-                NodeList wayList = root.getElementsByTagName("way");
-                
-                // Counter for alle noder totalt
-                int totalNodesCounter = 0;
 
-                // Counter for alle way-er gått igjennom
-                int numOfBuldingWays = 0;
+                Element aWay = document.getDocumentElement();
 
-                // Tell opp alle ganger highway forekommer
-                for (int i = 0; i < wayList.getLength(); i++) {
+                int numbersOfNd = aWay.getElementsByTagName("nd").getLength();
 
-                    // Nåværende way
-                    Node aWay = wayList.item(i);
+                NodeList tagList = aWay.getElementsByTagName("tag");
 
-                    // Om denne way-noden har child-nodes henter jeg ut disse.
-                    if (aWay.hasChildNodes()) {
-
-                        // Henter ut alle child-nodes til way-noden
-                        NodeList childNodeList = aWay.getChildNodes();
-
-                        // En teller for noder i nåværende way:
-                        int counter = 0;
-
-                        Boolean isABuilding = false;
-
-                        // Går igjennom alle disse child-nodene for å telle antall noder:
-                        for (int j = 0; j < childNodeList.getLength(); j++) {
-                            // Nåværende child-node i way
-                            Node childNode = childNodeList.item(j);
-                            // Teller antall nd-noder totalt
-                            if (childNode.getNodeName().equals("nd")) {
-                                counter++;
-                            }
-
-                            // Om ta-en man kommer over er en building, vet jeg at det er en building-way
-                            if (childNode.getNodeName().equals("tag")) {
-                                if (childNode.getAttributes().getNamedItem("k").getTextContent().equals("building")) {
-                                    isABuilding = true;
-
-                                    // Legger på en på telleren for antall building-wayer gått igjennom:
-                                    numOfBuldingWays++;
-                                }
-                            }
-                        }
-
-                        if(isABuilding){
-                            // Ettersom det nå var funnet en building blandt disse barnanodene, skal vi ta vare på nodene telt over:
-                            totalNodesCounter += counter;
-                        }
+                // Går igjennom alle disse child-nodene for å telle antall noder:
+                for (int j = 0; j < tagList.getLength(); j++) {
+                    if (tagList.item(j).getAttributes().getNamedItem("k").getTextContent().equals("building")) {
+                        context.write(new Text("The average number of nodes used to form the building ways is: "), new IntWritable(numbersOfNd));
                     }
                 }
-                int averageNodes = totalNodesCounter/numOfBuldingWays;
-                context.write(new Text("The average number of nodes used to form the building ways is: "), new IntWritable(averageNodes));
 
             } catch (SAXException exception) {
                 // ignore
             } catch (ParserConfigurationException exception) {
-
+                // ignore
             }
         }
 
@@ -239,13 +195,18 @@ public class Five_AverageNumOfNodesBuilding {
             extends Reducer < Text, IntWritable, Text, IntWritable > {
         private IntWritable result = new IntWritable();
 
+        private int totalNodesCounter = 0;
+
         public void reduce(Text key, Iterable < IntWritable > values, Context context) throws IOException, InterruptedException {
 
-            int sum = 0;
+            int numOfBuldingWays = 0;
+
             for (IntWritable val: values) {
-                sum += val.get();
+                totalNodesCounter++;
+                numOfBuldingWays += val.get();
             }
-            result.set(sum);
+
+            result.set(numOfBuldingWays/totalNodesCounter);
             context.write(key, result);
         }
     }
