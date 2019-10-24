@@ -1,9 +1,9 @@
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object Two_AddrStreetTagsPerStreet {
+object Three_ObjectMostUpdated {
 
-  // How many addr:street tags exist for each street?
+  // Which object in the extract has been updated the most times, and what object is that
   // 3 Linjer med kode utenom oppsettet
 
   def main(args: Array[String]) {
@@ -16,20 +16,21 @@ object Two_AddrStreetTagsPerStreet {
 
     import spark.implicits._
 
-    // Henter ut attributt k med dens verdi til tag man er i.
-    // Plukker ut de taggene hvor attributten er addr:street
-    val value = nodeData.select("_k", "_v").filter($"_k" === "addr:street")
+    // Henter id og versjon fra noder som har disse
+    val select = nodeData.select($"_id".as("Id"), $"_version".as("Version"))
 
-    // Grupperer så alle gatene etter verdien. Og teller disse
-    val next = value.groupBy($"_v".as("Gatenavn")).count()
+    // Sorterer disse synkede basert på versjonsnummer
+    val versions = select.orderBy($"_version".desc)
 
-    next.show()
-  }
+    //Skriver ut den første linjen (Som oså har det høyeste tallet)
+    versions.show(1)
+
+}
 
   private def searchForNodeAndTag(spark : SparkSession) = {
     val nodeData = spark.read.format("com.databricks.spark.xml")
       .option("rootTag", "osm")
-      .option("rowTag", "tag")
+      .option("rowTag", "node")
       .load("input/oslo.osm")
 
     nodeData

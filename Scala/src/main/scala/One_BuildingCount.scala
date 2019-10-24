@@ -1,5 +1,7 @@
 import org.apache.spark.{SparkConf, SparkContext}
 
+// 5 Linjer med kode (Utenom oppsettet)
+
 object One_BuildingCount {
 
   def main(args: Array[String]) {
