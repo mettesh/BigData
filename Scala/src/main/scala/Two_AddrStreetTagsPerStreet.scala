@@ -1,24 +1,32 @@
-import scala.io.Source
-import org.apache.log4j.Logger
-import org.apache.log4j.Level
-import org.apache.spark.SparkConf
-import org.apache.spark._
-
-import org.apache.log4j.{Level, Logger}
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object Two_AddrStreetTagsPerStreet {
 
-    def main(args: Array[String]) {
-      val conf = new SparkConf()
-      val sc = new SparkContext(conf)
-      val file = sc.textFile("input/oslo.osm")
-      val wordRdd = file.flatMap( line => line.split(" ") ).map( word => (word, 1) )
+  def main(args: Array[String]) {
 
-      val counts = wordRdd.reduceByKey( _ + _ )
+    val spark: SparkSession = initializeSpark(args)
+    val nodeData : DataFrame = searchForNodeAndTag(spark)
 
-      println(counts)
+  }
 
-      counts.saveAsTextFile("output/counts.txt")
-    }
+  private def searchForNodeAndTag(spark : SparkSession) = {
+    val nodeData = spark.read.format("com.databricks.spark.xml")
+      .option("rootTag", "node")
+      .option("rowTag", "tag")
+      .load("input/oslo.osm")
+
+    nodeData
+  }
+
+  private def initializeSpark(args: Array[String]) = {
+
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task2")
+    val sc = new SparkContext(conf)
+    sc.setLogLevel("ERROR")
+
+    val spark = SparkSession.builder().getOrCreate()
+
+    spark
+  }
 }

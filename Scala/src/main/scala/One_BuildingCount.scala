@@ -1,24 +1,23 @@
-import scala.io.Source
+import org.apache.spark.{SparkConf, SparkContext}
 
 object One_BuildingCount {
 
   def main(args: Array[String]) {
 
-    // How many buildings is it in the extract you selected?
-    var buildingCounter = 0;
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task1")
+    val sc = new SparkContext(conf)
+    sc.setLogLevel("ERROR")
 
-    val textFile = Source.fromFile("input/oslo.osm").mkString; //returns the file data as String
+    val file = sc.textFile(args(1))
 
-    //splitting String data with white space
-    val words = textFile.split(" ")
+    val buildingCounter = file.flatMap(line => line.split(" ") )
+      .map(word => (word.equals("k=\"building\""), 1))
+      .reduceByKey( _ + _ )
+      .map(word => "building" + word._1 + ": " + word._2)
 
-    for( aWord <- words ){
-      if(aWord.equals("k=\"building\"")){
-        buildingCounter = buildingCounter + 1
-      }
-    }
-
-    println("Numbers of buildings in the extract i selected: " + buildingCounter)
+    buildingCounter.saveAsTextFile(args(2))
 
   }
+
+
 }
