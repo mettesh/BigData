@@ -17,17 +17,24 @@ object Four_20TopHighWayNodes {
     import spark.implicits._
 
 
-    // Plukker ut child-tags og id-attributten til wayene
-    val query = wayData.select($"nd", $"_id", explode($"tag").as("Tags"))
+    // Plukker ut id-attributten og nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
+    // Ved å benytte explode vil innholdet i taggene også kunne plukkes ut
+    val query = wayData.select($"_id".as("Highway id"), $"nd", explode($"tag").as("Tags"))
 
-    // Filtrerer disse på de som er en highway
+    // Filtrerer disse på de wayene som har en tag hvor k= highway (Altså som er en highway)
     val highWayWays = query.filter($"Tags._k" === "highway")
+
+    // Legger til en kolonne som skal inneholder antall noder for hver highway
     val highwayWithNodes = highWayWays.withColumn("Nodes count", size($"nd"))
 
+    // Sorterer de til stigende rekkefølge
     val highwaysWithMostNodes = highwayWithNodes.orderBy($"Nodes count".desc)
 
-    highwaysWithMostNodes.show(20)
+    // Plukker ut det jeg vil vies
+    val result = highwaysWithMostNodes.select("Highway id", "Nodes count")
 
+    // Viser kun de 20 første. Da disse er de med flest antall noder
+    result.show(20)
 
   }
 
