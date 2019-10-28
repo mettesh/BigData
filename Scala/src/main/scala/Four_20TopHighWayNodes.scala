@@ -19,10 +19,10 @@ object Four_20TopHighWayNodes {
 
     // Plukker ut id-attributten og nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
     // Ved å benytte explode vil innholdet i taggene også kunne plukkes ut
-    val query = wayData.select($"_id".as("Highway id"), $"nd", explode($"tag").as("Tags"))
+    val query = wayData.select($"_id".as("Highway id"), $"nd", explode($"tag").as("Tag"))
 
     // Filtrerer disse på de wayene som har en tag hvor k= highway (Altså som er en highway)
-    val highWayWays = query.filter($"Tags._k" === "highway")
+    val highWayWays = query.filter($"Tag._k" === "highway")
 
     // Legger til en kolonne som skal inneholder antall noder for hver highway
     val highwayWithNodes = highWayWays.withColumn("Nodes count", size($"nd"))
