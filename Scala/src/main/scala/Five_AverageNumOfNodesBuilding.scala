@@ -17,17 +17,12 @@ object Five_AverageNumOfNodesBuilding {
     // Plukker ut nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
     val query = wayData.select( $"nd", explode($"tag").as("Tag"))
 
-    // Filtrerer disse på de wayene som har en tag hvor k= building (Altså som er en highway)
+    // Filtrerer disse på de wayene som har en tag hvor k= building (Altså som er en building-way)
     val buildingWays = query.filter($"Tag._k" === "building")
 
-    val avgNodes = buildingWays.agg(avg($"nd"))
-    // val numbersOfWays = sum(buildingWays)
-    // Må få ut antall wayer!!
-    // Legger til en kolonne som skal inneholder antall noder for hver highway
-    val buildingWithNodes = buildingWays.withColumn("Nodes count", avg($"nd"))
+    val numbersOfNodes = buildingWays.withColumn("Nodes count", size($"nd"))
 
-    buildingWithNodes.show()
-
+    numbersOfNodes.select(avg($"Nodes count").as("Average number of nodes")).show()
   }
 
   private def searchForNodeAndTag(spark : SparkSession) = {
