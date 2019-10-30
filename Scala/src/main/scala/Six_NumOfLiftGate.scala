@@ -4,7 +4,10 @@ import org.apache.spark.sql.functions._
 
 object Six_NumOfLiftGate {
 
-  // What is the average number of nodes used to form the building ways in the extract? 
+  // How many ways of types ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified” contains a node with the tag ”bar- rier=lift gate”?
+
+  //  <tag k="barrier" v="lift_gate"/>
+  //  <tag k="highway" v="path"/>
 
   def main(args: Array[String]) {
 
@@ -17,14 +20,20 @@ object Six_NumOfLiftGate {
     // Plukker ut nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
     val query = wayData.select( $"nd", explode($"tag").as("Tag"))
 
-    // Filtrerer disse på de wayene som har en tag hvor k= building (Altså som er en building-way)
-    val buildingWays = query.filter($"Tag._k" === "building")
+    // Filtrerer disse på de wayene som har en tag hvor k= highway (Altså som er en highway-way)
+    val highWayWays = query.filter($"Tag._k" === "highway")
 
+    // Filtrer disse igjen på highwayene som har value: path, service, road eller unclassified
+    val highWaysWithCorrectType = highWayWays.filter($"Tag._v" === "path" || $"Tag._v" === "service" || $"Tag._v" === "road" || $"Tag._v" === "unclassified")
+
+    val hasBarrierLiftGate = highWaysWithCorrectType.filter($"Tag._k" === "barrier" && $"Tag._v" === "lift_gate")
+
+    hasBarrierLiftGate.show()
     // Oppretter en ny kolonne hvor opptellingen av noder per way skal stå
-    val numbersOfNodes = buildingWays.withColumn("Nodes count", size($"nd"))
+    //val numbersOfNodes = buildingWays.withColumn("Nodes count", size($"nd"))
 
     // Tar gjennomsnittet av kolonnen med opptellinger og viser denne
-    numbersOfNodes.select(avg($"Nodes count").as("Average number of nodes")).show()
+    //numbersOfNodes.select(avg($"Nodes count").as("Average number of nodes")).show()
   }
 
   private def searchForNodeAndTag(spark : SparkSession) = {
