@@ -6,9 +6,6 @@ object Six_NumOfLiftGate {
 
   // How many ways of types ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified” contains a node with the tag ”bar- rier=lift gate”?
 
-  //  <tag k="barrier" v="lift_gate"/>
-  //  <tag k="highway" v="path"/>
-
   def main(args: Array[String]) {
 
 
@@ -17,23 +14,24 @@ object Six_NumOfLiftGate {
 
     import spark.implicits._
 
-    // Plukker ut nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
-    val query = wayData.select( $"nd", explode($"tag").as("Tag"))
+    // Plukker wayene med highway (Av korrekt type)
+    val query = wayData.select( $"_id", explode($"tag").as("HighwayTag"))
+    val highWayWays = query.filter($"HighwayTag._k" === "highway")
+    val highWaysWithCorrectType = highWayWays.filter($"HighwayTag._v" === "path" || $"HighwayTag._v" === "service" || $"HighwayTag._v" === "road" || $"HighwayTag._v" === "unclassified")
 
-    // Filtrerer disse på de wayene som har en tag hvor k= highway (Altså som er en highway-way)
-    val highWayWays = query.filter($"Tag._k" === "highway")
+    // Plukker ut wayene med lift_gate:
+    val query2 = wayData.select( $"_id", explode($"tag").as("BarrierTag"))
+    val barrierWays = query2.filter($"BarrierTag._k" === "barrier")
+    val liftGateBarrier = barrierWays.filter($"BarrierTag._v" === "lift_gate")
 
-    // Filtrer disse igjen på highwayene som har value: path, service, road eller unclassified
-    val highWaysWithCorrectType = highWayWays.filter($"Tag._v" === "path" || $"Tag._v" === "service" || $"Tag._v" === "road" || $"Tag._v" === "unclassified")
+    // Merger nå disse tabellene sammen på samme id
+    val tableJoin = highWaysWithCorrectType.join(liftGateBarrier, highWaysWithCorrectType("_id") === liftGateBarrier("_id"))
 
-    val hasBarrierLiftGate = highWaysWithCorrectType.filter($"Tag._k" === "barrier" && $"Tag._v" === "lift_gate")
+    // Grupperer de etter highwaytype
+    val groupedBy = tableJoin.groupBy($"HighwayTag._v".as("Highway type")).count()
 
-    hasBarrierLiftGate.show()
-    // Oppretter en ny kolonne hvor opptellingen av noder per way skal stå
-    //val numbersOfNodes = buildingWays.withColumn("Nodes count", size($"nd"))
+    groupedBy.show()
 
-    // Tar gjennomsnittet av kolonnen med opptellinger og viser denne
-    //numbersOfNodes.select(avg($"Nodes count").as("Average number of nodes")).show()
   }
 
   private def searchForNodeAndTag(spark : SparkSession) = {
