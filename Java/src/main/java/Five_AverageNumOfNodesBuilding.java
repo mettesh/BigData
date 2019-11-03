@@ -1,27 +1,29 @@
 // What is the average number of nodes used to form the building ways in the extract?
 
 import java.io.IOException;
-        import java.io.StringReader;
-        import java.util.*;
-        import org.apache.hadoop.conf.Configuration;
-        import org.apache.hadoop.fs.Path;
-        import org.apache.hadoop.fs.FSDataInputStream;
-        import org.apache.hadoop.fs.FileSystem;
-        import org.apache.hadoop.io.*;
-        import org.apache.hadoop.io.Text;
-        import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-        import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-        import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-        import org.apache.hadoop.mapreduce.*;
-        import javax.xml.parsers.*;
-        import javax.xml.parsers.ParserConfigurationException;
-        import org.w3c.dom.*;
-        import org.xml.sax.SAXException;
-        import org.xml.sax.InputSource;
+import java.io.StringReader;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.*;
+import javax.xml.parsers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 
 public class Five_AverageNumOfNodesBuilding {
 
     public static void main(String[] args) throws Exception {
+
+        long time = System.currentTimeMillis();
+
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
 
@@ -38,7 +40,18 @@ public class Five_AverageNumOfNodesBuilding {
         job.setOutputValueClass(IntWritable.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+        if(job.waitForCompletion(true)){
+            time = System.currentTimeMillis() - time;
+            System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+            System.exit(0);
+        }
+        else{
+            time = System.currentTimeMillis() - time;
+            System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+            System.exit(1);
+        }
+
     }
 
     public static class StartEndFileInputFormat extends FileInputFormat <LongWritable, Text > {

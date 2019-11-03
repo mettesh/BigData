@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -22,6 +21,9 @@ import org.xml.sax.InputSource;
 public class Six_NumOfLiftGate {
 
     public static void main(String[] args) throws Exception {
+
+        long time = System.currentTimeMillis();
+
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
 
@@ -38,7 +40,18 @@ public class Six_NumOfLiftGate {
         job.setOutputValueClass(IntWritable.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+        if(job.waitForCompletion(true)){
+            time = System.currentTimeMillis() - time;
+            System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+            System.exit(0);
+        }
+        else{
+            time = System.currentTimeMillis() - time;
+            System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+            System.exit(1);
+        }
+
     }
 
     public static class StartEndFileInputFormat extends FileInputFormat <LongWritable, Text > {

@@ -64,11 +64,12 @@ public class One_BuildingCount {
 
       // Setter nå sammen nøkkelen med alle verdiene til denne (summen som ble lagt sammen over)
       context.write(key, result);
-
     }
   }
 
   public static void main(String[] args) throws Exception {
+
+    long time = System.currentTimeMillis();
 
     if (args.length != 2){
       System.err.println("Invalid arguments!\n");
@@ -85,6 +86,17 @@ public class One_BuildingCount {
     job.setOutputValueClass(IntWritable.class);
     FileInputFormat.addInputPath(job, new Path(args[0]));
     FileOutputFormat.setOutputPath(job, new Path(args[1]));
-    System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+    if(job.waitForCompletion(true)){
+      time = System.currentTimeMillis() - time;
+      System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+      System.exit(0);
+    }
+    else{
+      time = System.currentTimeMillis() - time;
+      System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+      System.exit(1);
+    }
+
   }
 }

@@ -17,12 +17,14 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
 
-
 // Hvor mange <nd> elementer det er i <way> xml noder som har en tag med highway=*
 
 public class Four_20TopHighWayNodes {
 
     public static void main(String[] args) throws Exception {
+
+        long time = System.currentTimeMillis();
+
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
 
@@ -39,7 +41,17 @@ public class Four_20TopHighWayNodes {
         job.setOutputValueClass(IntWritable.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+        if(job.waitForCompletion(true)){
+            time = System.currentTimeMillis() - time;
+            System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+            System.exit(0);
+        }
+        else{
+            time = System.currentTimeMillis() - time;
+            System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
+            System.exit(1);
+        }
     }
 
     public static class StartEndFileInputFormat extends FileInputFormat < LongWritable, Text > {
