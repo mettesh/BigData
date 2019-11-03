@@ -12,7 +12,7 @@ object Six_NumOfLiftGate {
     val spark: SparkSession = initializeSpark(args)
 
     var time = System.currentTimeMillis()
-    
+
     val wayData : DataFrame = searchForNodeAndTag(spark)
 
     import spark.implicits._
