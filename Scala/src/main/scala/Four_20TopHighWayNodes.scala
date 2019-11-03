@@ -11,11 +11,12 @@ object Four_20TopHighWayNodes {
     //Initaliserer spark
     val spark: SparkSession = initializeSpark(args)
 
+    var time = System.currentTimeMillis()
+
     //Henter inn data basert på ønskede tagger (Way-er):
     val wayData : DataFrame = searchForNodeAndTag(spark)
 
     import spark.implicits._
-
 
     // Plukker ut id-attributten og nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
     // Ved å benytte explode vil innholdet i taggene også kunne plukkes ut
@@ -35,6 +36,9 @@ object Four_20TopHighWayNodes {
 
     // Viser kun de 20 første. Da disse er de med flest antall noder
     result.show(20)
+
+    time = System.currentTimeMillis() - time
+    printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0)
 
   }
 

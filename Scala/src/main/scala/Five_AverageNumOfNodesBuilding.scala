@@ -10,6 +10,9 @@ object Five_AverageNumOfNodesBuilding {
 
 
     val spark: SparkSession = initializeSpark(args)
+
+    var time = System.currentTimeMillis()
+
     val wayData : DataFrame = searchForNodeAndTag(spark)
 
     import spark.implicits._
@@ -23,6 +26,10 @@ object Five_AverageNumOfNodesBuilding {
     val numbersOfNodes = buildingWays.withColumn("Nodes count", size($"nd"))
 
     numbersOfNodes.select(avg($"Nodes count").as("Average number of nodes")).show()
+
+    time = System.currentTimeMillis() - time
+    printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0)
+
   }
 
   private def searchForNodeAndTag(spark : SparkSession) = {

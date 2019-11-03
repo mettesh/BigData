@@ -10,6 +10,9 @@ object Six_NumOfLiftGate {
 
 
     val spark: SparkSession = initializeSpark(args)
+
+    var time = System.currentTimeMillis()
+
     val wayData : DataFrame = searchForNodeAndTag(spark)
 
     import spark.implicits._
@@ -31,6 +34,9 @@ object Six_NumOfLiftGate {
     val groupedBy = tableJoin.groupBy($"HighwayTag._v".as("Highway type")).count()
 
     groupedBy.show()
+
+    time = System.currentTimeMillis() - time
+    printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0)
 
   }
 

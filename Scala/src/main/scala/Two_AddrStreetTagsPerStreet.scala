@@ -11,6 +11,8 @@ object Two_AddrStreetTagsPerStreet {
     //Initaliserer spark
     val spark: SparkSession = initializeSpark(args)
 
+    var time = System.currentTimeMillis()
+
     //Henter inn data basert på ønskede tagger:
     val nodeData : DataFrame = searchForNodeAndTag(spark)
 
@@ -24,6 +26,9 @@ object Two_AddrStreetTagsPerStreet {
     val next = value.groupBy($"_v".as("Gatenavn")).count()
 
     next.show()
+
+    time = System.currentTimeMillis() - time
+    printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0)
   }
 
   private def searchForNodeAndTag(spark : SparkSession) = {
