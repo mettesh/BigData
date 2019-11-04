@@ -1,11 +1,13 @@
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object Creative_topTenCityCyclePlacesInExtract {
+object CreativeOne_topTenCityCyclePlacesInExtract {
 
-  // Hvilke 10 steder i extractem er bysykkel mest populært å starte turen fra?
+  // Hvilke 10 steder i extracten er bysykkel mest populært å starte turen fra?
 
   def main(args: Array[String]) {
+
+    var time = System.currentTimeMillis()
 
     val spark: SparkSession = initializeSpark(args)
     val osloDataFrame : DataFrame = searchForNodeAndTag(spark)
@@ -27,6 +29,9 @@ object Creative_topTenCityCyclePlacesInExtract {
 
     // Henter ut de 10 første, da jeg vil ha frem de 10 mest populære stedene
     result.show(10)
+
+    time = System.currentTimeMillis() - time
+    printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0)
 
   }
 
