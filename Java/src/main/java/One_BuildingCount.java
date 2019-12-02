@@ -68,8 +68,7 @@ public class One_BuildingCount {
   }
 
   public static void main(String[] args) throws Exception {
-
-    long time = System.currentTimeMillis();
+    long systemTime = System.currentTimeMillis();
 
     if (args.length != 2){
       System.err.println("Invalid arguments!\n");
@@ -86,6 +85,11 @@ public class One_BuildingCount {
     job.setOutputValueClass(IntWritable.class);
     FileInputFormat.addInputPath(job, new Path(args[0]));
     FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+    systemTime = System.currentTimeMillis() - systemTime;
+    System.out.printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0);
+
+    long time = System.currentTimeMillis();
 
     if(job.waitForCompletion(true)){
       time = System.currentTimeMillis() - time;

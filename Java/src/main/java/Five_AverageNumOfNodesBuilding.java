@@ -22,7 +22,7 @@ public class Five_AverageNumOfNodesBuilding {
 
     public static void main(String[] args) throws Exception {
 
-        long time = System.currentTimeMillis();
+        long systemTime = System.currentTimeMillis();
 
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
@@ -40,6 +40,11 @@ public class Five_AverageNumOfNodesBuilding {
         job.setOutputValueClass(IntWritable.class);
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        systemTime = System.currentTimeMillis() - systemTime;
+        System.out.printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0);
+
+        long time = System.currentTimeMillis();
 
         if(job.waitForCompletion(true)){
             time = System.currentTimeMillis() - time;
@@ -87,7 +92,6 @@ public class Five_AverageNumOfNodesBuilding {
             Configuration job = context.getConfiguration();
             this.startTag = job.get("startTag").getBytes("utf-8");
             this.endTag = job.get("endTag").getBytes("utf-8");
-
 
             start = split.getStart();
             end = start + split.getLength();
@@ -148,7 +152,6 @@ public class Five_AverageNumOfNodesBuilding {
             return value;
         }
 
-
         @Override
         public float getProgress() throws IOException,
                 InterruptedException {
@@ -158,7 +161,6 @@ public class Five_AverageNumOfNodesBuilding {
                 return Math.min(1.0f, (pos - start) / (float)(end - start));
             }
         }
-
 
         @Override
         public void close() throws IOException {
@@ -196,16 +198,15 @@ public class Five_AverageNumOfNodesBuilding {
                 }
 
             } catch (SAXException exception) {
-                // ignore
+                System.out.println("SAXExeption: " + exception);
             } catch (ParserConfigurationException exception) {
-                // ignore
+                System.out.println("ParserConfigurationExeption: " + exception);
             }
         }
 
     }
 
-    public static class IntSumReducer
-            extends Reducer < Text, IntWritable, Text, IntWritable > {
+    public static class IntSumReducer extends Reducer < Text, IntWritable, Text, IntWritable > {
         private IntWritable result = new IntWritable();
 
         private int totalNodesCounter = 0;

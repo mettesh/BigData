@@ -22,7 +22,7 @@ public class Six_NumOfLiftGate {
 
     public static void main(String[] args) throws Exception {
 
-        long time = System.currentTimeMillis();
+        long systemTime = System.currentTimeMillis();
 
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
@@ -41,6 +41,11 @@ public class Six_NumOfLiftGate {
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
+        systemTime = System.currentTimeMillis() - systemTime;
+        System.out.printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0);
+
+        long time = System.currentTimeMillis();
+
         if(job.waitForCompletion(true)){
             time = System.currentTimeMillis() - time;
             System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
@@ -51,7 +56,6 @@ public class Six_NumOfLiftGate {
             System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
             System.exit(1);
         }
-
     }
 
     public static class StartEndFileInputFormat extends FileInputFormat <LongWritable, Text > {
@@ -177,13 +181,11 @@ public class Six_NumOfLiftGate {
                 InterruptedException {
 
             try {
-
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 InputSource is = new InputSource(new StringReader(value.toString()));
                 Document document = builder.parse(is);
                 document.getDocumentElement().normalize();
-
 
                 Element aWay = document.getDocumentElement();
 
@@ -191,11 +193,8 @@ public class Six_NumOfLiftGate {
                 NodeList tagList = aWay.getElementsByTagName("tag");
 
                 boolean containsBarrier;
-                int wayCounter;
 
-                wayCounter = 0;
                 containsBarrier = false;
-
 
                 // Går igjennom alle disse child-nodene
                 for (int j = 0; j < tagList.getLength(); j++) {
@@ -214,7 +213,6 @@ public class Six_NumOfLiftGate {
                     if (tagNode.getAttributes().getNamedItem("k").getTextContent().equals("highway")) {
 
                         // Om way-en er av riktig hghwaytype skal denne sjekkes
-
                         if (isCorrectHighwayType(tagNode)) {
 
                             // Om denne wayen har vist seg å inneholde barrier skal det plusses på en
@@ -225,7 +223,6 @@ public class Six_NumOfLiftGate {
                                 context.write(new Text("Numbers of ways of type highway= " + tagNode.getAttributes().removeNamedItem("v").getTextContent() + "  that a node with the tag ”bar-rier=liftgate”: " ), none);
                             }
                         }
-
                     }
                 }
 
@@ -238,7 +235,6 @@ public class Six_NumOfLiftGate {
 
         private boolean isCorrectHighwayType(Node childNode) {
             //Sjekker om highway er en av disse typene: ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified”
-
             return childNode.getAttributes().getNamedItem("v").getTextContent().equals("path")
                     || childNode.getAttributes().getNamedItem("v").getTextContent().equals("service")
                     || childNode.getAttributes().getNamedItem("v").getTextContent().equals("road")

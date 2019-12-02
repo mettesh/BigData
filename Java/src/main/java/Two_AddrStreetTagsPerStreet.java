@@ -22,14 +22,13 @@ public class Two_AddrStreetTagsPerStreet {
 
     public static void main(String[] args) throws Exception {
 
-        long time = System.currentTimeMillis();
+        long systemTime = System.currentTimeMillis();
 
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
 
-        conf.set("startTag", "<osm");
-        conf.set("endTag", "</osm>");
-
+        conf.set("startTag", "<node");
+        conf.set("endTag", "</node>");
 
         Job job = Job.getInstance(conf, "xml count");
 
@@ -42,10 +41,12 @@ public class Two_AddrStreetTagsPerStreet {
 
         FileInputFormat.addInputPath(job, new Path(args[0]));
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+        systemTime = System.currentTimeMillis() - systemTime;
+        System.out.printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0);
+
+        long time = System.currentTimeMillis();
 
         if(job.waitForCompletion(true)){
             time = System.currentTimeMillis() - time;
@@ -177,8 +178,7 @@ public class Two_AddrStreetTagsPerStreet {
         }
     }
 
-    public static class TokenizerMapper
-            extends Mapper < Object, Text, Text, IntWritable > {
+    public static class TokenizerMapper extends Mapper < Object, Text, Text, IntWritable > {
 
         private final static IntWritable one = new IntWritable(1);
         private Text word = new Text();
@@ -187,7 +187,6 @@ public class Two_AddrStreetTagsPerStreet {
                 InterruptedException {
 
             try {
-
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();
 
@@ -197,10 +196,10 @@ public class Two_AddrStreetTagsPerStreet {
 
                 document.getDocumentElement().normalize();
 
-                Element root = document.getDocumentElement();
+                Element aNode = document.getDocumentElement();
 
                 // Henter ut key i alle tag-er
-                NodeList tag = root.getElementsByTagName("tag");
+                NodeList tag = aNode.getElementsByTagName("tag");
 
                 // Itererer igjennom alle tag-ene
                 for(int i = 0; i < tag.getLength(); i++){
@@ -215,15 +214,12 @@ public class Two_AddrStreetTagsPerStreet {
                     }
                 }
 
-
-
             } catch (SAXException exception) {
-                // ignore
+                System.out.println("SAXExeption: " + exception);
             } catch (ParserConfigurationException exception) {
-
+                System.out.println("ParserConfigurationExeption: " + exception);
             }
         }
-
     }
 
     public static class IntSumReducer

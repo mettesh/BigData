@@ -13,11 +13,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.*;
-
-
 import javax.xml.parsers.*;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
@@ -28,7 +25,7 @@ public class Three_ObjectMostUpdated {
 
     public static void main(String[] args) throws Exception {
 
-        long time = System.currentTimeMillis();
+        long systemTime = System.currentTimeMillis();
 
         Configuration conf = new Configuration();
         conf.addResource("hdfs-site.xml");
@@ -49,6 +46,11 @@ public class Three_ObjectMostUpdated {
 
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
+        systemTime = System.currentTimeMillis() - systemTime;
+        System.out.printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0);
+
+        long time = System.currentTimeMillis();
+
         if(job.waitForCompletion(true)){
             time = System.currentTimeMillis() - time;
             System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
@@ -68,7 +70,6 @@ public class Three_ObjectMostUpdated {
 
             StartEndRecordReader reader = new StartEndRecordReader();
             reader.initialize(split, context);
-
             return reader;
         }
 
@@ -179,8 +180,7 @@ public class Three_ObjectMostUpdated {
         }
     }
 
-    public static class TokenizerMapper
-            extends Mapper < Object, Text, Text, IntWritable > {
+    public static class TokenizerMapper extends Mapper < Object, Text, Text, IntWritable > {
 
         private final static IntWritable one = new IntWritable(1);
         private Text word = new Text();
@@ -218,36 +218,30 @@ public class Three_ObjectMostUpdated {
                         newestVersion = versionNumber;
                         newestNodeId = nodeId;
                     }
-
                 }
-
-
-                context.write(new Text("The object that has been updated the most times is node with the id " + newestNodeId + " has version: "), new IntWritable(newestVersion));
-
-
-
+                context.write(new Text(newestNodeId), new IntWritable(newestVersion));
 
             } catch (SAXException exception) {
-                // ignore
+                System.out.println("SAXExeption: " + exception);
             } catch (ParserConfigurationException exception) {
-
+                System.out.println("ParserConfigurationExeption: " + exception);
             }
         }
-
     }
 
-    public static class IntSumReducer
-            extends Reducer < Text, IntWritable, Text, IntWritable > {
-        private IntWritable result = new IntWritable();
+    public static class IntSumReducer extends Reducer < Text, IntWritable, Text, IntWritable > {
+        private IntWritable nodeVersion = new IntWritable();
+        private Text nodeId = new Text();
 
         public void reduce(Text key, Iterable < IntWritable > values, Context context) throws IOException, InterruptedException {
 
-            int sum = 0;
+            int version = 0;
             for (IntWritable val: values) {
-                sum += val.get();
+                version = val.get();
             }
-            result.set(sum);
-            context.write(key, result);
+            nodeVersion.set(version);
+            nodeId.set("Node with id " + key + " has been updated most times. Numbers of updates: ");
+            context.write(nodeId, nodeVersion);
         }
     }
 }
