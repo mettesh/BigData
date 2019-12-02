@@ -8,14 +8,16 @@ object Five_AverageNumOfNodesBuilding {
 
   def main(args: Array[String]) {
 
+    var systemTime = System.currentTimeMillis()
 
     val spark: SparkSession = initializeSpark(args)
+    val wayData : DataFrame = searchForNodeAndTag(spark)
+    import spark.implicits._
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
 
     var time = System.currentTimeMillis()
-
-    val wayData : DataFrame = searchForNodeAndTag(spark)
-
-    import spark.implicits._
 
     // Plukker ut nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
     val query = wayData.select( $"nd", explode($"tag").as("Tag"))
@@ -42,7 +44,7 @@ object Five_AverageNumOfNodesBuilding {
   }
 
   private def initializeSpark(args: Array[String]) = {
-    val conf = new SparkConf().setMaster(args(0)).setAppName("Two - How many addr:street tags exist for each street?")
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task 5")
     val sc = new SparkContext(conf)
     sc.setLogLevel("ERROR")
 

@@ -4,19 +4,21 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 object Two_AddrStreetTagsPerStreet {
 
   // How many addr:street tags exist for each street?
-  // 3 Linjer med kode utenom oppsettet
 
   def main(args: Array[String]) {
 
+    var systemTime = System.currentTimeMillis()
+
     //Initaliserer spark
     val spark: SparkSession = initializeSpark(args)
-
-    var time = System.currentTimeMillis()
-
     //Henter inn data basert på ønskede tagger:
     val nodeData : DataFrame = searchForNodeAndTag(spark)
-
     import spark.implicits._
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
+
+    var time = System.currentTimeMillis()
 
     // Henter ut attributt k med dens verdi til tag man er i.
     // Plukker ut de taggene hvor attributten er addr:street
@@ -41,7 +43,7 @@ object Two_AddrStreetTagsPerStreet {
   }
 
   private def initializeSpark(args: Array[String]) = {
-    val conf = new SparkConf().setMaster(args(0)).setAppName("Two - How many addr:street tags exist for each street?")
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task 2")
     val sc = new SparkContext(conf)
     sc.setLogLevel("ERROR")
 

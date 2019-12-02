@@ -1,16 +1,18 @@
 import org.apache.spark.{SparkConf, SparkContext}
 
-// 5 Linjer med kode (Utenom oppsettet)
-
 object One_BuildingCount {
 
   def main(args: Array[String]) {
 
-    val conf = new SparkConf().setMaster(args(0)).setAppName("Task1")
+    var systemTime = System.currentTimeMillis()
+
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task 1")
     val sc = new SparkContext(conf)
     sc.setLogLevel("ERROR")
-
     val file = sc.textFile(args(1))
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
 
     var time = System.currentTimeMillis()
 

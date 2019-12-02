@@ -7,13 +7,17 @@ object CreativeOne_topTenCityCyclePlacesInExtract {
 
   def main(args: Array[String]) {
 
-    var time = System.currentTimeMillis()
+    var systemTime = System.currentTimeMillis()
 
     val spark: SparkSession = initializeSpark(args)
     val osloDataFrame : DataFrame = searchForNodeAndTag(spark)
     val cityCyclingDataFrame : DataFrame = searchForNodeAndTagCityCycling(spark)
-
     import spark.implicits._
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
+
+    var time = System.currentTimeMillis()
 
     // Fra oslo.osm plukkes det ut de ulike addr:street-ene som finnes i extractet:
     val streetsInExtract = osloDataFrame.select($"_k", $"_v").filter($"_k" === "addr:street")

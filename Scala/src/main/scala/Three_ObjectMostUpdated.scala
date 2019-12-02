@@ -4,19 +4,21 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 object Three_ObjectMostUpdated {
 
   // Which object in the extract has been updated the most times, and what object is that
-  // 3 Linjer med kode utenom oppsettet
 
   def main(args: Array[String]) {
 
+    var systemTime = System.currentTimeMillis()
+
     //Initaliserer spark
     val spark: SparkSession = initializeSpark(args)
-
-    var time = System.currentTimeMillis()
-
     //Henter inn data basert på ønskede tagger:
     val nodeData : DataFrame = searchForNodeAndTag(spark)
-
     import spark.implicits._
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
+
+    var time = System.currentTimeMillis()
 
     // Henter id og versjon fra noder som har disse
     val select = nodeData.select($"_id".as("Id"), $"_version".as("Version"))
@@ -42,7 +44,7 @@ object Three_ObjectMostUpdated {
   }
 
   private def initializeSpark(args: Array[String]) = {
-    val conf = new SparkConf().setMaster(args(0)).setAppName("Two - How many addr:street tags exist for each street?")
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task 3")
     val sc = new SparkContext(conf)
     sc.setLogLevel("ERROR")
 

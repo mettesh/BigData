@@ -8,14 +8,16 @@ object Six_NumOfLiftGate {
 
   def main(args: Array[String]) {
 
+    var systemTime = System.currentTimeMillis()
 
     val spark: SparkSession = initializeSpark(args)
+    val wayData : DataFrame = searchForNodeAndTag(spark)
+    import spark.implicits._
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
 
     var time = System.currentTimeMillis()
-
-    val wayData : DataFrame = searchForNodeAndTag(spark)
-
-    import spark.implicits._
 
     // Plukker wayene med highway (Av korrekt type)
     val query = wayData.select( $"_id", explode($"tag").as("HighwayTag"))
@@ -50,7 +52,7 @@ object Six_NumOfLiftGate {
   }
 
   private def initializeSpark(args: Array[String]) = {
-    val conf = new SparkConf().setMaster(args(0)).setAppName("Two - How many addr:street tags exist for each street?")
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task 6")
     val sc = new SparkContext(conf)
     sc.setLogLevel("ERROR")
 

@@ -8,15 +8,18 @@ object Four_20TopHighWayNodes {
 
   def main(args: Array[String]) {
 
+    var systemTime = System.currentTimeMillis()
     //Initaliserer spark
+
     val spark: SparkSession = initializeSpark(args)
-
-    var time = System.currentTimeMillis()
-
     //Henter inn data basert på ønskede tagger (Way-er):
     val wayData : DataFrame = searchForNodeAndTag(spark)
-
     import spark.implicits._
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
+
+    var time = System.currentTimeMillis()
 
     // Plukker ut id-attributten og nd-barna til wayen. Den vil også plukke ut alle taggene, med innhold, til nåværende way
     // Ved å benytte explode vil innholdet i taggene også kunne plukkes ut
@@ -52,7 +55,7 @@ object Four_20TopHighWayNodes {
   }
 
   private def initializeSpark(args: Array[String]) = {
-    val conf = new SparkConf().setMaster(args(0)).setAppName("Two - How many addr:street tags exist for each street?")
+    val conf = new SparkConf().setMaster(args(0)).setAppName("Task 4")
     val sc = new SparkContext(conf)
     sc.setLogLevel("ERROR")
 

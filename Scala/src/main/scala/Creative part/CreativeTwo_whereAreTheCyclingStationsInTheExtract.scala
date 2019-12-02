@@ -7,13 +7,17 @@ object CreativeTwo_whereAreTheCyclingStationsInTheExtract {
 
   def main(args: Array[String]) {
 
-    var time = System.currentTimeMillis()
+    var systemTime = System.currentTimeMillis()
 
     val spark: SparkSession = initializeSpark(args)
     val osloDataFrame : DataFrame = searchForNodeAndTag(spark)
     val cityCyclingDataFrame : DataFrame = searchForNodeAndTagCityCycling(spark)
-
     import spark.implicits._
+
+    systemTime = System.currentTimeMillis() - systemTime
+    printf("Oppstartstid\t: %6.3f s\n", systemTime / 1000.0)
+
+    var time = System.currentTimeMillis()
 
     // Hvor finnes bysykkelstativer i ekstraktet? (Obs, kun de som er blitt brukt så langt i november)
 
