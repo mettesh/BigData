@@ -17,8 +17,6 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
 
-// Hvor mange <nd> elementer det er i <way> xml noder som har en tag med highway=*
-
 public class Four_20TopHighWayNodes {
 
     public static void main(String[] args) throws Exception {

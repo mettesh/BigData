@@ -16,8 +16,6 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
 
-// How many ways of types ”highway=path”, ”highway=service”, ”high- way=road”, ”highway=unclassified” contains a node with the tag ”barrier=lift gate”?
-
 public class Six_NumOfLiftGate {
 
     public static void main(String[] args) throws Exception {
@@ -240,11 +238,9 @@ public class Six_NumOfLiftGate {
                     || childNode.getAttributes().getNamedItem("v").getTextContent().equals("road")
                     || childNode.getAttributes().getNamedItem("v").getTextContent().equals("unclassified");
         }
-
     }
 
-    public static class IntSumReducer
-            extends Reducer < Text, IntWritable, Text, IntWritable > {
+    public static class IntSumReducer extends Reducer < Text, IntWritable, Text, IntWritable > {
         private IntWritable result = new IntWritable();
 
         public void reduce(Text key, Iterable < IntWritable > values, Context context) throws IOException, InterruptedException {

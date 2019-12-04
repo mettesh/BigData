@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.io.StringReader;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -18,8 +17,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
-
-// Which object in the extract has been updated the most times, and what object is that?
 
 public class Three_ObjectMostUpdated {
 

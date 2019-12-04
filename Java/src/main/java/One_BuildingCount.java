@@ -40,7 +40,7 @@ public class One_BuildingCount {
         // Setter dette ordet til å være text (Da hadoop ikke leser String, men text)
         word.set(aWord);
 
-    //OPPRETTER KEY,VALUE:
+     //OPPRETTER KEY,VALUE:
         // Setter nå en ordet til å være key, og deretter en value
         // Disse må være på datatype som hadoop forstår (one = intWriteble 1)
         context.write(word, one);

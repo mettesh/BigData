@@ -1,5 +1,3 @@
-// What is the average number of nodes used to form the building ways in the extract?
-
 import java.io.IOException;
 import java.io.StringReader;
 import org.apache.hadoop.conf.Configuration;
@@ -56,7 +54,6 @@ public class Five_AverageNumOfNodesBuilding {
             System.out.printf("Kjøretid i sekunder\t: %6.3f s\n", time / 1000.0);
             System.exit(1);
         }
-
     }
 
     public static class StartEndFileInputFormat extends FileInputFormat <LongWritable, Text > {
@@ -82,7 +79,6 @@ public class Five_AverageNumOfNodesBuilding {
         private LongWritable key = new LongWritable();
         private Text value = new Text();
         private final DataOutputBuffer buffer = new DataOutputBuffer();
-
 
         @Override
         public void initialize(InputSplit genericSplit, TaskAttemptContext context) throws IOException {
@@ -183,7 +179,6 @@ public class Five_AverageNumOfNodesBuilding {
                 Document document = builder.parse(is);
                 document.getDocumentElement().normalize();
 
-
                 Element aWay = document.getDocumentElement();
 
                 int numbersOfNd = aWay.getElementsByTagName("nd").getLength();
@@ -203,7 +198,6 @@ public class Five_AverageNumOfNodesBuilding {
                 System.out.println("ParserConfigurationExeption: " + exception);
             }
         }
-
     }
 
     public static class IntSumReducer extends Reducer < Text, IntWritable, Text, IntWritable > {
