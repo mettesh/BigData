@@ -61,14 +61,14 @@ object Seven_15HighwaysMostTrafficCalmingHump {
     nodeData
   }
 
-private def searchForWayAndTag(spark : SparkSession) = {
-  val wayData = spark.read.format("com.databricks.spark.xml")
-    .option("rootTag", "osm")
-    .option("rowTag", "way")
-    .load("input/oslo.osm")
+  private def searchForWayAndTag(spark : SparkSession) = {
+    val wayData = spark.read.format("com.databricks.spark.xml")
+      .option("rootTag", "osm")
+      .option("rowTag", "way")
+      .load("input/oslo.osm")
 
-  wayData
-}
+    wayData
+  }
 
   private def initializeSpark(args: Array[String]) = {
     val conf = new SparkConf().setMaster(args(0)).setAppName("Task 6")
